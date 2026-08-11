@@ -142,19 +142,11 @@
 
 <script>
     // =====================================================
-    // 🔧 CONFIGURACIÓN - CAMBIA SOLO ESTO
+    // CONFIGURACIÓN - USA EL ENLACE DE PUBLICACIÓN
     // =====================================================
     
-    // 1. El ID de tu Google Sheets (el que está en la URL de compartir)
-    //    Ejemplo: https://drive.google.com/file/d/ABC123_xyz/view
-    //    El ID sería: ABC123_xyz
-    const SPREADSHEET_ID = '1k2sJ43pSx45arkA3Pmi3EjAFwosA-98XReB7EnRsIRw';
-    
-    // 2. El nombre de la hoja (pestaña) donde están los datos
-    const SHEET_NAME = 'Hoja 1';
-    
-    // 3. Las columnas en tu Excel (en el mismo orden que aparecen)
-    const COLUMNAS = ['inventario', 'folio', 'marca', 'ultimaVerificacion', 'ubicacion'];
+    // El enlace de publicación de tu Google Sheets
+    const URL_PUBLICA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhX8Yilga0isiAMicgh0XG63SMzgNku0dlyK7UBP0oq9UNd1Q6pZKkH6yhPB2EIJdz47cM10s1BlaF/pub?output=csv';
     
     // =====================================================
     // NO TOCAR DEBAJO DE ESTA LÍNEA
@@ -163,37 +155,6 @@
     function obtenerParametro(nombre) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(nombre);
-    }
-    
-    async function obtenerDatosDeGoogleSheets() {
-        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
-        
-        try {
-            const response = await fetch(url);
-            const texto = await response.text();
-            
-            // Extraer el JSON del formato de Google
-            const jsonStr = texto.substring(47, texto.length - 2);
-            const data = JSON.parse(jsonStr);
-            
-            // Convertir a formato amigable
-            const filas = data.table.rows;
-            const resultados = [];
-            
-            for (let i = 1; i < filas.length; i++) { // Empezar desde 1 para saltar encabezados
-                const fila = filas[i];
-                const obj = {};
-                for (let j = 0; j < COLUMNAS.length; j++) {
-                    obj[COLUMNAS[j]] = fila.c[j] ? fila.c[j].v : '';
-                }
-                resultados.push(obj);
-            }
-            
-            return resultados;
-        } catch (error) {
-            console.error('Error al cargar datos:', error);
-            return null;
-        }
     }
     
     function obtenerIconoPorTipo(inventario) {
@@ -215,6 +176,40 @@
         return '📌';
     }
     
+    async function obtenerDatosDeGoogleSheets() {
+        try {
+            const response = await fetch(URL_PUBLICA);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos');
+            }
+            
+            const csvText = await response.text();
+            
+            // Convertir CSV a JSON
+            const lineas = csvText.split('\n').filter(linea => linea.trim() !== '');
+            const encabezados = lineas[0].split(',').map(h => h.trim());
+            
+            const resultados = [];
+            for (let i = 1; i < lineas.length; i++) {
+                const valores = lineas[i].split(',').map(v => v.trim());
+                const obj = {};
+                for (let j = 0; j < encabezados.length; j++) {
+                    // Limpiar comillas y caracteres especiales
+                    let valor = valores[j] || '';
+                    valor = valor.replace(/^"|"$/g, ''); // Eliminar comillas al inicio y final
+                    obj[encabezados[j]] = valor;
+                }
+                resultados.push(obj);
+            }
+            
+            return resultados;
+        } catch (error) {
+            console.error('Error al cargar datos:', error);
+            return null;
+        }
+    }
+    
     async function mostrarEquipo() {
         const contenedor = document.getElementById('contenido');
         const folioBuscado = obtenerParametro('folio');
@@ -228,7 +223,7 @@
                     <div style="margin-top: 15px; padding: 10px; background: #f0f4f8; border-radius: 8px;">
                         <p style="font-size: 14px; color: #555;">Ejemplo de URL:</p>
                         <code style="background: #e8eef5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                            visor.html?folio=FOL-001
+                            index.html?folio=FOL-001
                         </code>
                     </div>
                     <div class="badge">Sistema de inventario</div>
@@ -254,7 +249,7 @@
                     <h2>⚠️ Error de conexión</h2>
                     <p>No se pudo cargar el inventario</p>
                     <p style="font-size: 14px; margin-top: 10px; color: #95a5a6;">
-                        Verifica tu conexión a internet y que el archivo esté publicado
+                        Verifica tu conexión a internet
                     </p>
                 </div>
             `;
@@ -262,7 +257,7 @@
         }
         
         // Buscar el equipo por folio
-        const equipo = datos.find(item => item.folio === folioBuscado);
+        const equipo = datos.find(item => item.Folio === folioBuscado);
         
         if (!equipo) {
             contenedor.innerHTML = `
@@ -275,37 +270,41 @@
                     <p style="font-size: 14px; color: #95a5a6; margin-top: 10px;">
                         Verifica que el folio sea correcto
                     </p>
+                    <div style="margin-top: 15px; padding: 10px; background: #f0f4f8; border-radius: 8px; text-align: left;">
+                        <p style="font-size: 12px; color: #666;">📌 Folios disponibles en el inventario:</p>
+                        ${datos.map(item => `<span style="display: inline-block; background: #e8eef5; padding: 2px 8px; margin: 2px; border-radius: 4px; font-size: 11px;">${item.Folio}</span>`).join('')}
+                    </div>
                 </div>
             `;
             return;
         }
         
         // Obtener icono según el tipo de equipo
-        const icono = obtenerIconoPorTipo(equipo.inventario);
+        const icono = obtenerIconoPorTipo(equipo.Inventario);
         
         // Mostrar los datos del equipo encontrado
         contenedor.innerHTML = `
             <div class="icono-equipo">${icono}</div>
-            <h1 class="titulo">${equipo.inventario || 'Equipo'}</h1>
+            <h1 class="titulo">${equipo.Inventario || 'Equipo'}</h1>
             
             <div class="campo">
                 <div class="etiqueta">🔢 Folio</div>
-                <div class="valor"><span class="folio-destacado">${equipo.folio}</span></div>
+                <div class="valor"><span class="folio-destacado">${equipo.Folio}</span></div>
             </div>
             
             <div class="campo">
                 <div class="etiqueta">🏷️ Marca</div>
-                <div class="valor">${equipo.marca || 'No especificada'}</div>
+                <div class="valor">${equipo.Marca || 'No especificada'}</div>
             </div>
             
             <div class="campo">
                 <div class="etiqueta">📅 Última verificación</div>
-                <div class="valor">${equipo.ultimaVerificacion || 'No registrada'}</div>
+                <div class="valor">${equipo['Ultima verificación'] || 'No registrada'}</div>
             </div>
             
             <div class="campo">
                 <div class="etiqueta">📍 Ubicación</div>
-                <div class="valor">${equipo.ubicacion || 'No especificada'}</div>
+                <div class="valor">${equipo.Ubicacion || 'No especificada'}</div>
             </div>
             
             <div style="text-align: center; margin-top: 15px;">
