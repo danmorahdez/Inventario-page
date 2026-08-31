@@ -348,25 +348,30 @@
             </div>
             
             <div class="campo">
-                <div class="etiqueta">Ubicación / Área</div>
+                <div class="etiqueta">Modelo</div>
                 <div class="valor">${equipo.Modelo || 'No especificada'}</div>
             </div>
 
             <div class="campo">
-                <div class="etiqueta">Ubicación / Área</div>
+                <div class="etiqueta">Marca</div>
+                <div class="valor">${equipo.Ubicacion || 'No especificada'}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Ubicación</div>
                 <div class="valor">${equipo.Ubicacion || 'No especificada'}</div>
             </div>
 
             <div class="campo">
-                <div class="etiqueta">Característica / Detalle</div>
+                <div class="etiqueta">Zona</div>
                 <div class="valor">${equipo.Zona || 'No especificada'}</div>
             </div>
             
             <div class="campo">
-                <div class="etiqueta">Característica / Detalle</div>
+                <div class="etiqueta">Estado</div>
                 <div class="valor">${equipo.Estado || 'No especificada'}</div>
             </div>
-            
+            <!--
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
                 <div class="campo" style="border-left-color: #3498db; margin: 0;">
                     <div class="etiqueta">Hoja de Origen</div>
@@ -377,7 +382,7 @@
                     <div class="valor" style="font-size: 16px;">Fila ${equipo.Fila || 'N/A'}, Columna ${equipo.Columna || 'N/A'}</div>
                 </div>
             </div>
-            
+            -->
             <div class="campo" style="border-left-color: ${equipo.Estado === 'En funcionamiento' ? '#27ae60' : '#f39c12'};">
                 <div class="etiqueta">Estado</div>
                 <div class="valor">
