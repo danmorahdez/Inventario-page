@@ -311,7 +311,7 @@
             // Mostrar folios disponibles para ayudar al usuario
             const foliosDisponibles = datos.map(item => item.Folio).filter(Boolean);
             const muestraFolios = foliosDisponibles.slice(0, 15);
-            
+            ////Mensaje de error 
             contenedor.innerHTML = `
                 <div class="error">
                     <h2>❌ Equipo no encontrado</h2>
@@ -349,12 +349,22 @@
             
             <div class="campo">
                 <div class="etiqueta">Ubicación / Área</div>
-                <div class="valor">${equipo['Hoja de Origen'] || 'No especificada'}</div>
+                <div class="valor">${equipo.Modelo || 'No especificada'}</div>
+            </div>
+
+            <div class="campo">
+                <div class="etiqueta">Ubicación / Área</div>
+                <div class="valor">${equipo.Ubicacion || 'No especificada'}</div>
+            </div>
+
+            <div class="campo">
+                <div class="etiqueta">Característica / Detalle</div>
+                <div class="valor">${equipo.Zona || 'No especificada'}</div>
             </div>
             
             <div class="campo">
                 <div class="etiqueta">Característica / Detalle</div>
-                <div class="valor">${equipo.Característica || 'No especificada'}</div>
+                <div class="valor">${equipo.Estado || 'No especificada'}</div>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
